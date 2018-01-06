@@ -1,0 +1,41 @@
+Brian Moore - 04L
+Troy Simpkins - 03L
+
+Project 3 Design Document
+
+Perhaps the most difficult part of this project was understanding exactly what we were trying to do. Once we figured
+out how sockets work and why we're using them it was off to the races from there. 
+
+Once we got a good understanding of what we were trying to do with this project, we had to make some changes to our
+project 2 code to make packet forwarding work flawlessly. Once we did this we could move on to connection set up. We
+opted to make our own socket data type that had all of the information necessary to describe the state of the current 
+connection. Once a client connects to a server, we fork the listening socket and create a new one for the connection to take 
+place and add it to the list of sockets on the client and server ends. This was a good solution, however, we decided not
+to use file descriptors, so when sockets are identified we just find a socket with corresponding source and destination
+port values. This achieves the same result as file descriptors, but it's a little less elegant. 
+
+For data transmissions, we took advantage of a couple things. Since we are sending numbers from 0 to a transfer size,
+the data itself already tells the order in which it should be received. This makes indexing very easy for the buffers
+sice the value of the data directly corresponds to its position in the buffer. Additionally, since data is never
+actually removed from the receive buffer (yet), the sliding window just checks to make sure that there is enough space on the
+buffer, we haven't reached the transfer size yet, and we haven't reached the maximum TCP payload size. This is the amount
+of data we send in each window. It should be pointed put that, instead of sending multiple packets in each window, we instead
+send an array of data appropriate for the window on a single packet. This was done for one key reason. We saw no way to dynamically
+create timers in nesC that correspond to each packet that is sent in the window. Even if you could create a dynamic amount of timers
+there is no way to know which timer corresponds to which packet. The tradeoff with our solution is that, if a packet is lost, multiple
+pieces of data are lost and must be retransmitted.
+
+As for connection teardown, this was done in a very simple way. We treated connection teardown like a reverse three-way handshake.
+This is not exactly how TCP does connection teardown in reality, but this method works and can be implemented in a reasonable amount
+of code. The tradeoff is that some packets can be cut off at the end of a transmission if a FIN packet is sent before all of the data
+has been sent. However, connection usually only ends once the transmission has been completed assuming it isn't ended early by
+using the close python function. That would be the case if the python close function worked anyway. We tried to make the close
+function work, but it broke everything even though it was implemented in exactly the same way as our setTestServer and
+setTestClient functions. It appears I would have to modify one of the files that says "do not modify" at the top to
+fix this issue, and I really don't want to break our code because I'm quite pleased with it.
+
+And now to address the elephant in the room. No, we did not modularize project 3. We really wanted to modularize this project, since
+we didn't modularize the previous 2, but we soon realized that modularizing project 3 would basically require modularizing
+the previous 2 projects. Since we already had to fix our project 2 to begin with, we prioritized functionality over readability.
+Despite not modularizing the code, it is still fairly clean, due to the use of switch statements, formatting, and separating each
+project with comments.  

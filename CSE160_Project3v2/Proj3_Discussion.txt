@@ -1,0 +1,32 @@
+Brian Moore - 04L
+Troy SImpkins - 03L
+
+Project 3 Discussion Questions
+
+1.) There is no actual requirement for picking a starting sequence number, and this is left up to
+    how the Operating System chooses to implement this part of TCP. However, picking a random starting 
+    sequence number is better because it is more secure. Imagine you started a transmission, and
+    someone wanted the hijack the connection by pretending to be you. If a sequence number of 1
+    is chosen in the beginning, someone could easily guess the sequence number and start injecting
+    there own packets very easily. If the starting sequence number is random, however, then guessing
+    the sequence number is very difficult, and injecting false packets is nearly impossible. Additionally,
+    radom sequence numbers can also help distinguish between multiple connections using the same port
+    numbers.
+
+2.) The buffer should be large enough that it can handle a "tyical" transmission size. Since we haven't implemented
+    the application layer yet, data is never actually removed from the receive buffer, so it must be sufficiently large
+    to handle most transmissions otherwise the transmission will be cut off as soon as the buffer is full. We chose
+    a size 256 Bytes, or enough to hold 128 16 bit unsigned integers. 
+
+
+3.) If our implementation was attacked this way, then our maximum amount of sockets would be used up immediately since each SYN
+    causes the server to fork a new socket to handle the new connection. In order to handle an attack like this, the server could
+    check its socket list to see if the node trying to connect to it already has an open connection with the server. If this is the 
+    case then the server could reject this new connection and avoid running out of sockets. Alternatively, the server could set
+    a maximum sockets per host value and make sure no host has more than that aount of open connections to the server.
+
+4.) In our implementation, a connection is closed once the transmission is over. Once the client has sent its entire transfer size
+    of data, it automatically closes the connection. However, if a client sent some data, but never completed the transmission
+    this would be a problem. If the connection is never closed, we have a similar problem as before, and that socket will never
+    be freed to host a new connection. To avoid this issue, we could give clients a maximum connection time. Alternatively,
+    you could also automatically disconnect users that haven't sent any data in some period of time.
